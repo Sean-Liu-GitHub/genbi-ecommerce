@@ -1,0 +1,8 @@
+.env
+*.json
+!package.json
+!**/target/manifest.json
+!**/target/catalog.json
+*-key.json
+credentials/
+.gcp/
