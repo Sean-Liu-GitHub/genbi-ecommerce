@@ -1,4 +1,6 @@
 .env
+__pycache__/
+*.pyc
 *.json
 !package.json
 !**/target/manifest.json
