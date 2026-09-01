@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: int_order_items_enriched
+    description: >
+      One row per order line (line-item grain) — the same grain as
+      `stg_order_items`, enriched with cost, margin, and product/distribution-center
+      attributes. This is the lowest common grain for revenue and cost:
+      `order_items.sale_price` and `inventory_items.cost` both live at the
+      unit level, so line grain is the only place they can be joined and
+      differenced without distortion.
+
+      Every downstream model reads from here, not from `stg_order_items`
+      directly, and nothing above this model may re-join `orders`,
+      `inventory_items`, or `products` before aggregating. An order has a
+      variable number of lines (median 1, p95 4, max 4 in this snapshot —
+      see `docs/SCHEMA_NOTES.md` Block 3), so joining a header-grain table
+      (one row per order) to a line-grain table (one row per line) and then
+      summing an order-level column, such as `orders.num_of_item`, fans
+      each order out once per line and double-counts it. Measured on this
+      snapshot, that mistake inflates a unit count by 1.9x
+      (`docs/SCHEMA_NOTES.md` Block 3, Q3.2) — not the naive
+      mean-lines-per-order of 1.45, because large orders dominate the error
+      quadratically (`error_ratio` = Σn²/Σn, not Σn/count(orders)).
+
+      The join path to `products` goes through `inventory_items`
+      (`inventory_item_id`), not the denormalised `order_items.product_id`
+      that exists in the raw source (per D5, `docs/SCHEMA_NOTES.md`
+      Block 11) — that second path was dropped in staging so there is only
+      one way to reach `products` from here. `unit_cost` comes from
+      `inventory_items.cost`, the physical-unit grain, not `products.cost`
+      (D2) — also dropped in staging for the same reason.
+    columns:
+      - name: order_item_id
+        description: Primary key. One row per order line.
+      - name: order_id
+        description: Foreign key to `stg_orders.order_id`. Not unique — an order may have multiple lines.
+      - name: user_id
+        description: Foreign key to `stg_users.user_id`.
+      - name: inventory_item_id
+        description: Foreign key to `stg_inventory_items.inventory_item_id` — the physical unit sold on this line.
+      - name: line_status
+        description: Canonical fulfilment status for this line (D1).
+      - name: ordered_at
+        description: Canonical revenue-anchor timestamp (D3).
+      - name: shipped_at
+        description: Timestamp the line shipped, if any.
+      - name: delivered_at
+        description: Timestamp the line was delivered, if any.
+      - name: returned_at
+        description: Timestamp the line was returned, if any.
+      - name: sale_price
+        description: Actual unit price charged for this line.
+      - name: unit_cost
+        description: Canonical cost for this line, from `inventory_items.cost` (D2).
+      - name: line_margin
+        description: "`sale_price - unit_cost` for this line."
+      - name: category
+        description: Product category, from `products` via the `inventory_item_id` join path.
+      - name: brand
+        description: Product brand, from `products` via the `inventory_item_id` join path.
+      - name: department
+        description: Product department, from `products` via the `inventory_item_id` join path.
+      - name: distribution_center
+        description: Name of the distribution center that stocked this line's product.
