@@ -9,3 +9,4 @@ __pycache__/
 *-key.json
 credentials/
 .gcp/
+project-build-guide.md

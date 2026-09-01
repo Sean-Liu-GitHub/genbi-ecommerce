@@ -1,0 +1,263 @@
+version: 2
+
+sources:
+  - name: thelook
+    database: genbi-ecommerce
+    schema: raw_thelook
+    description: >
+      Snapshot of `bigquery-public-data.thelook_ecommerce`, copied into
+      `genbi-ecommerce.raw_thelook` on 2026-08-27 via `scripts/snapshot.sql`.
+      The public dataset is synthetic and regenerates periodically, so all
+      ground truth and accuracy numbers in this project refer to this
+      snapshot, not the live public dataset. See `docs/DATA.md` for row
+      counts and date ranges, and `docs/SCHEMA_NOTES.md` for profiling
+      findings and canonical-column decisions.
+    tables:
+      - name: orders
+        description: >
+          One row per order (order-header grain). `status` and
+          `num_of_item` are convenience rollups from `order_items`;
+          per `docs/SCHEMA_NOTES.md` D1, line-level status on
+          `order_items` is treated as canonical because it is observed
+          per item, even though header and line agree in this snapshot.
+        columns:
+          - name: order_id
+            description: Primary key. One row per order.
+          - name: user_id
+            description: Foreign key to `users.id`.
+          - name: status
+            description: >
+              Order-header fulfilment status, rolled up from the order's
+              lines. Values: Shipped, Complete, Processing, Cancelled,
+              Returned.
+          - name: gender
+            description: >
+              Copy of the ordering user's gender at order time. Compare
+              to `users.gender`.
+          - name: created_at
+            description: Timestamp the order was placed.
+          - name: returned_at
+            description: >
+              Timestamp the order was returned, if any. Header-level
+              copy of the per-line `order_items.returned_at`.
+          - name: shipped_at
+            description: Timestamp the order shipped, if any.
+          - name: delivered_at
+            description: Timestamp the order was delivered, if any.
+          - name: num_of_item
+            description: >
+              Header-level count of line items on the order. Summing this
+              across orders double-counts relative to `COUNT(*)` on
+              `order_items` — see the fan-out finding in
+              `docs/SCHEMA_NOTES.md` Block 3.
+
+      - name: order_items
+        description: >
+          One row per order line (line-item grain). Joins to `orders` on
+          `order_id`, to `inventory_items` on `inventory_item_id`, and
+          denormalises `product_id`/`user_id` from the same purchase
+          event. Revenue and status are decided at this grain.
+        columns:
+          - name: id
+            description: Primary key. One row per order line.
+          - name: order_id
+            description: Foreign key to `orders.order_id`.
+          - name: user_id
+            description: >
+              Foreign key to `users.id`, denormalised onto the line.
+              Agrees with `orders.user_id` in this snapshot.
+          - name: product_id
+            description: >
+              Foreign key to `products.id`. A second, denormalised path
+              to the product exists via `inventory_item_id ->
+              inventory_items.product_id`; the two paths agree in this
+              snapshot but the intermediate model joins via
+              `inventory_item_id` (see `docs/SCHEMA_NOTES.md` D5).
+          - name: inventory_item_id
+            description: >
+              Foreign key to `inventory_items.id` — the specific physical
+              unit sold. Canonical join path to product and cost.
+          - name: status
+            description: >
+              Line-level fulfilment status. Values: Shipped, Complete,
+              Processing, Cancelled, Returned. Canonical status column
+              per `docs/SCHEMA_NOTES.md` D1.
+          - name: created_at
+            description: >
+              Timestamp the line was ordered. Canonical revenue-anchor
+              timestamp per `docs/SCHEMA_NOTES.md` D3 — never null, and
+              lives on the same table as `sale_price`.
+          - name: shipped_at
+            description: >
+              Timestamp the line shipped, if any. Null for unfulfilled
+              lines. In 19.6% of rows this precedes `created_at`.
+          - name: delivered_at
+            description: Timestamp the line was delivered, if any. Null for undelivered lines.
+          - name: returned_at
+            description: Timestamp the line was returned, if any. Null unless `status = 'Returned'`.
+          - name: sale_price
+            description: >
+              Actual unit price charged for this line. Always equal to
+              `products.retail_price` in this snapshot (no discounting
+              observed) — see `docs/SCHEMA_NOTES.md` D10.
+
+      - name: products
+        description: >
+          One row per product (catalog grain). Cost and price here are
+          list/catalog values; the physical unit sold carries its own
+          copy on `inventory_items`.
+        columns:
+          - name: id
+            description: Primary key.
+          - name: cost
+            description: >
+              Catalog cost. Identical to `inventory_items.cost` in this
+              snapshot (0% divergence), but `inventory_items.cost` is
+              canonical — see `docs/SCHEMA_NOTES.md` D2.
+          - name: category
+            description: Product category (26 distinct values).
+          - name: name
+            description: Product name.
+          - name: brand
+            description: Product brand (2,756 distinct values).
+          - name: retail_price
+            description: >
+              Catalog list price. In this dataset, always equals sale_price
+              (no discounting). Do not use for revenue calculations — use
+              order_items.sale_price instead.
+          - name: department
+            description: Product department (2 distinct values).
+          - name: sku
+            description: Stock-keeping unit code.
+          - name: distribution_center_id
+            description: Foreign key to `distribution_centers.id`.
+
+      - name: users
+        description: One row per user (customer grain).
+        columns:
+          - name: id
+            description: Primary key.
+          - name: first_name
+            description: User first name.
+          - name: last_name
+            description: User last name.
+          - name: email
+            description: User email address.
+          - name: age
+            description: User age.
+          - name: gender
+            description: >
+              User gender. Compare to `orders.gender`, which agrees in
+              this snapshot.
+          - name: state
+            description: User state/province (229 distinct values).
+          - name: street_address
+            description: User street address.
+          - name: postal_code
+            description: User postal code.
+          - name: city
+            description: User city.
+          - name: country
+            description: User country (15 distinct values).
+          - name: latitude
+            description: User latitude.
+          - name: longitude
+            description: User longitude.
+          - name: traffic_source
+            description: Marketing channel that acquired the user (5 distinct values).
+          - name: created_at
+            description: Timestamp the user account was created.
+          - name: user_geom
+            description: >
+              GEOGRAPHY point derived from lat/long. Excluded from
+              staging — inflates bytes scanned and breaks
+              `to_dataframe()`.
+
+      - name: inventory_items
+        description: >
+          One row per physical unit purchased into inventory (unit
+          grain), each eventually linked to at most one `order_items`
+          row via `inventory_item_id`. Carries a denormalised copy of
+          the product's attributes as of when the unit was stocked.
+        columns:
+          - name: id
+            description: Primary key. One row per physical unit.
+          - name: product_id
+            description: Foreign key to `products.id`.
+          - name: created_at
+            description: Timestamp the unit was added to inventory.
+          - name: sold_at
+            description: >
+              Intended to be the timestamp the unit was sold. Always
+              NULL for all 181,162 sold items in this snapshot — do not
+              use; treat "when was item X sold" as unanswerable from
+              this column. See `docs/SCHEMA_NOTES.md` Block 11.
+          - name: cost
+            description: >
+              Cost of this specific unit. Canonical cost column per
+              `docs/SCHEMA_NOTES.md` D2 — physically correct grain even
+              though it's identical to `products.cost` in this snapshot.
+          - name: product_category
+            description: Denormalised copy of `products.category` as of stocking. Agrees 100% with `products` in this snapshot.
+          - name: product_name
+            description: Denormalised copy of `products.name`.
+          - name: product_brand
+            description: Denormalised copy of `products.brand`. Agrees 100% with `products`.
+          - name: product_retail_price
+            description: Denormalised copy of `products.retail_price`. Agrees 100% with `products`.
+          - name: product_department
+            description: Denormalised copy of `products.department`.
+          - name: product_sku
+            description: Denormalised copy of `products.sku`.
+          - name: product_distribution_center_id
+            description: Denormalised copy of `products.distribution_center_id`.
+
+      - name: distribution_centers
+        description: One row per warehouse (10 rows).
+        columns:
+          - name: id
+            description: Primary key.
+          - name: name
+            description: Distribution center name.
+          - name: latitude
+            description: Distribution center latitude.
+          - name: longitude
+            description: Distribution center longitude.
+          - name: distribution_center_geom
+            description: >
+              GEOGRAPHY point derived from lat/long. Excluded from
+              staging — inflates bytes scanned and breaks
+              `to_dataframe()`.
+
+      - name: events
+        description: >
+          One row per website/app event (clickstream grain, not tied to
+          an order). Not currently joined into the mart layer; declared
+          here for completeness and future use.
+        columns:
+          - name: id
+            description: Primary key.
+          - name: user_id
+            description: Foreign key to `users.id`. May be null for anonymous sessions.
+          - name: sequence_number
+            description: Ordinal position of this event within its session.
+          - name: session_id
+            description: Session identifier grouping events from one browsing session.
+          - name: created_at
+            description: Timestamp the event occurred.
+          - name: ip_address
+            description: Client IP address at event time.
+          - name: city
+            description: Client city, derived from IP/geolocation.
+          - name: state
+            description: Client state/province, derived from IP/geolocation.
+          - name: postal_code
+            description: Client postal code, derived from IP/geolocation.
+          - name: browser
+            description: Client browser.
+          - name: traffic_source
+            description: Marketing channel that led to this event.
+          - name: uri
+            description: Page or endpoint path for this event.
+          - name: event_type
+            description: Type of event (e.g. page view, cart action).
