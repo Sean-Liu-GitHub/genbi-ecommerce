@@ -1,0 +1,134 @@
+version: 2
+
+models:
+  - name: fct_order_items
+    description: >
+      One row per order line (line-item grain). Straight passthrough of
+      `int_order_items_enriched`, materialized as the query surface for the
+      semantic layer. See `int_order_items_enriched` for the grain
+      explanation and why nothing above line grain may re-join `orders`,
+      `inventory_items`, or `products` before aggregating.
+    columns:
+      - name: order_item_id
+        description: Primary key. One row per order line.
+      - name: order_id
+        description: Foreign key to `fct_orders.order_id`. Not unique — an order may have multiple lines.
+      - name: user_id
+        description: Foreign key to `dim_users.user_id`.
+      - name: inventory_item_id
+        description: Foreign key to `stg_inventory_items.inventory_item_id` — the physical unit sold on this line.
+      - name: line_status
+        description: Canonical fulfilment status for this line (D1). Values Shipped, Complete, Processing, Cancelled, Returned.
+      - name: ordered_at
+        description: Canonical revenue-anchor timestamp (D3).
+      - name: shipped_at
+        description: Timestamp the line shipped, if any.
+      - name: delivered_at
+        description: Timestamp the line was delivered, if any.
+      - name: returned_at
+        description: Timestamp the line was returned, if any.
+      - name: sale_price
+        description: Actual unit price charged for this line.
+      - name: unit_cost
+        description: Canonical cost for this line, from `inventory_items.cost` (D2).
+      - name: line_margin
+        description: "`sale_price - unit_cost` for this line."
+      - name: category
+        description: Product category.
+      - name: brand
+        description: Product brand.
+      - name: department
+        description: Product department.
+      - name: distribution_center
+        description: Name of the distribution center that stocked this line's product.
+
+  - name: fct_orders
+    description: >
+      One row per order (order-header grain), aggregated once from
+      `int_order_items_enriched`. Row count equals `stg_orders` row count —
+      every order appears exactly once, including orders whose lines were
+      excluded by the `as_of_date` filter (their revenue/cost fields are 0
+      and `line_count` is 0). This is the fan-out canary: joining a header
+      row to N line rows and then aggregating must never multiply or drop
+      an order.
+    columns:
+      - name: order_id
+        description: Primary key. One row per order.
+      - name: user_id
+        description: Foreign key to `dim_users.user_id`.
+      - name: ordered_at
+        description: Timestamp the order was placed (header-level).
+      - name: order_status
+        description: Order-header fulfilment status. See D1 — line-level status on `fct_order_items` is canonical for filtering.
+      - name: line_count
+        description: Number of order lines on this order. Do not use `orders.num_of_item` for this — see the fan-out finding in `docs/SCHEMA_NOTES.md` Block 3.
+      - name: gross_revenue
+        description: "`SUM(sale_price)` across all lines, all statuses (D6)."
+      - name: net_revenue
+        description: "`SUM(sale_price)` across lines excluding Returned and Cancelled (D7)."
+      - name: total_cost
+        description: "`SUM(unit_cost)` across all lines, all statuses."
+      - name: net_cost
+        description: "`SUM(unit_cost)` across lines excluding Returned and Cancelled — pairs with `net_revenue` for a net-margin metric."
+      - name: is_returned
+        description: >
+          True if any line on this order has status Returned. Safe as a
+          boolean because this snapshot has no partial returns — every
+          order is either fully returned or not (`docs/SCHEMA_NOTES.md`
+          Block 9, Q9.4).
+
+  - name: fct_user_activity
+    description: >
+      One row per user who has placed at least one order, aggregated from
+      `stg_orders` (order-header grain, not line grain — no fan-out risk
+      here since each user contributes one row per order regardless of
+      line count). Holds the D8 `active_user` definition as a dynamic
+      metric rather than a static flag on `dim_users`, so it stays correct
+      as `as_of_date` moves instead of needing a rebuild of the dimension
+      table.
+    columns:
+      - name: user_id
+        description: Foreign key to `dim_users.user_id`. Not a full user list — only users with at least one order.
+      - name: first_ordered_at
+        description: Timestamp of this user's earliest order.
+      - name: last_ordered_at
+        description: Timestamp of this user's most recent order.
+      - name: lifetime_order_count
+        description: Count of distinct orders placed by this user.
+      - name: is_active_user
+        description: >
+          True if `last_ordered_at` falls within the trailing 90 days of
+          `as_of_date` (D8). False (not null) for users with no qualifying
+          orders.
+
+  - name: dim_users
+    description: One row per user (customer grain). Passthrough of `stg_users`.
+    columns:
+      - name: user_id
+        description: Primary key.
+      - name: gender
+        description: User gender.
+      - name: state
+        description: User state/province.
+      - name: country
+        description: User country.
+      - name: traffic_source
+        description: Marketing channel that acquired the user.
+      - name: signed_up_at
+        description: Timestamp the user account was created.
+
+  - name: dim_products
+    description: One row per product (catalog grain), with distribution center name resolved.
+    columns:
+      - name: product_id
+        description: Primary key.
+      - name: category
+        description: Product category.
+      - name: brand
+        description: Product brand.
+      - name: department
+        description: Product department.
+      - name: retail_price
+        description: Catalog list price. Always equals `sale_price` in this dataset — no discounting observed (D10).
+      - name: distribution_center
+        description: Name of the distribution center that stocks this product.
