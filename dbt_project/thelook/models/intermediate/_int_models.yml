@@ -33,16 +33,44 @@ models:
     columns:
       - name: order_item_id
         description: Primary key. One row per order line.
+        tests:
+          - unique
+          - not_null
       - name: order_id
         description: Foreign key to `stg_orders.order_id`. Not unique — an order may have multiple lines.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
       - name: user_id
         description: Foreign key to `stg_users.user_id`.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_users')
+                field: user_id
       - name: inventory_item_id
         description: Foreign key to `stg_inventory_items.inventory_item_id` — the physical unit sold on this line.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_inventory_items')
+                field: inventory_item_id
       - name: line_status
         description: Canonical fulfilment status for this line (D1).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Shipped', 'Complete', 'Processing', 'Cancelled', 'Returned']
       - name: ordered_at
         description: Canonical revenue-anchor timestamp (D3).
+        tests:
+          - not_null
       - name: shipped_at
         description: Timestamp the line shipped, if any.
       - name: delivered_at
@@ -51,10 +79,16 @@ models:
         description: Timestamp the line was returned, if any.
       - name: sale_price
         description: Actual unit price charged for this line.
+        tests:
+          - not_null
       - name: unit_cost
         description: Canonical cost for this line, from `inventory_items.cost` (D2).
+        tests:
+          - not_null
       - name: line_margin
         description: "`sale_price - unit_cost` for this line."
+        tests:
+          - not_null
       - name: category
         description: Product category, from `products` via the `inventory_item_id` join path.
       - name: brand

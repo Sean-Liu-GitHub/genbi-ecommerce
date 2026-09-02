@@ -11,16 +11,35 @@ models:
     columns:
       - name: order_item_id
         description: Primary key. One row per order line.
+        tests:
+          - unique
+          - not_null
       - name: order_id
-        description: Foreign key to `fct_orders.order_id`. Not unique — an order may have multiple lines.
+        description: Foreign key to orders. Not unique — an order may have multiple lines.
+        tests:
+          - not_null
       - name: user_id
-        description: Foreign key to `dim_users.user_id`.
+        description: Foreign key to users.
+        tests:
+          - not_null
       - name: inventory_item_id
         description: Foreign key to `stg_inventory_items.inventory_item_id` — the physical unit sold on this line.
+        tests:
+          - not_null
       - name: line_status
-        description: Canonical fulfilment status for this line (D1). Values Shipped, Complete, Processing, Cancelled, Returned.
+        description: >
+          Canonical fulfilment status for this line (D1). Values: Shipped,
+          Complete, Processing, Cancelled, Returned. Net revenue and net
+          cost metrics exclude Returned and Cancelled lines (D7).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Shipped', 'Complete', 'Processing', 'Cancelled', 'Returned']
       - name: ordered_at
-        description: Canonical revenue-anchor timestamp (D3).
+        description: Canonical revenue-anchor timestamp (D3). Use this for all time-based filtering.
+        tests:
+          - not_null
       - name: shipped_at
         description: Timestamp the line shipped, if any.
       - name: delivered_at
@@ -28,11 +47,17 @@ models:
       - name: returned_at
         description: Timestamp the line was returned, if any.
       - name: sale_price
-        description: Actual unit price charged for this line.
+        description: Actual unit price charged for this line. Sum this for revenue metrics.
+        tests:
+          - not_null
       - name: unit_cost
         description: Canonical cost for this line, from `inventory_items.cost` (D2).
+        tests:
+          - not_null
       - name: line_margin
         description: "`sale_price - unit_cost` for this line."
+        tests:
+          - not_null
       - name: category
         description: Product category.
       - name: brand
@@ -54,28 +79,61 @@ models:
     columns:
       - name: order_id
         description: Primary key. One row per order.
+        tests:
+          - unique
+          - not_null
       - name: user_id
         description: Foreign key to `dim_users.user_id`.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_users')
+                field: user_id
       - name: ordered_at
         description: Timestamp the order was placed (header-level).
+        tests:
+          - not_null
       - name: order_status
-        description: Order-header fulfilment status. See D1 — line-level status on `fct_order_items` is canonical for filtering.
+        description: >
+          Order-header fulfilment status. See D1 — line-level status on
+          `fct_order_items` is canonical for filtering.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Shipped', 'Complete', 'Processing', 'Cancelled', 'Returned']
       - name: line_count
-        description: Number of order lines on this order. Do not use `orders.num_of_item` for this — see the fan-out finding in `docs/SCHEMA_NOTES.md` Block 3.
+        description: >
+          Number of order lines on this order. Do not use
+          `orders.num_of_item` for this — see the fan-out finding in
+          `docs/SCHEMA_NOTES.md` Block 3.
+        tests:
+          - not_null
       - name: gross_revenue
         description: "`SUM(sale_price)` across all lines, all statuses (D6)."
+        tests:
+          - not_null
       - name: net_revenue
         description: "`SUM(sale_price)` across lines excluding Returned and Cancelled (D7)."
+        tests:
+          - not_null
       - name: total_cost
         description: "`SUM(unit_cost)` across all lines, all statuses."
+        tests:
+          - not_null
       - name: net_cost
         description: "`SUM(unit_cost)` across lines excluding Returned and Cancelled — pairs with `net_revenue` for a net-margin metric."
+        tests:
+          - not_null
       - name: is_returned
         description: >
           True if any line on this order has status Returned. Safe as a
           boolean because this snapshot has no partial returns — every
           order is either fully returned or not (`docs/SCHEMA_NOTES.md`
           Block 9, Q9.4).
+        tests:
+          - not_null
 
   - name: fct_user_activity
     description: >
@@ -88,28 +146,61 @@ models:
       table.
     columns:
       - name: user_id
-        description: Foreign key to `dim_users.user_id`. Not a full user list — only users with at least one order.
+        description: >
+          Primary key. Foreign key to `dim_users.user_id`. Not a full
+          user list — only users with at least one order.
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_users')
+                field: user_id
       - name: first_ordered_at
         description: Timestamp of this user's earliest order.
+        tests:
+          - not_null
       - name: last_ordered_at
         description: Timestamp of this user's most recent order.
+        tests:
+          - not_null
       - name: lifetime_order_count
         description: Count of distinct orders placed by this user.
+        tests:
+          - not_null
       - name: is_active_user
         description: >
           True if `last_ordered_at` falls within the trailing 90 days of
           `as_of_date` (D8). False (not null) for users with no qualifying
           orders.
+        tests:
+          - not_null
 
   - name: dim_users
-    description: One row per user (customer grain). Passthrough of `stg_users`.
+    description: >
+      One row per user (customer grain). Passthrough of `stg_users`.
+      Stable attributes only — behavioral fields like `last_ordered_at`
+      and `is_active_user` live on `fct_user_activity`.
     columns:
       - name: user_id
         description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: first_name
+        description: User first name. Synthetic in this dataset.
+      - name: last_name
+        description: User last name. Synthetic in this dataset.
+      - name: age
+        description: User age at time of account creation.
       - name: gender
         description: User gender.
       - name: state
-        description: User state/province.
+        description: User state or province.
+      - name: postal_code
+        description: User postal code.
+      - name: city
+        description: User city.
       - name: country
         description: User country.
       - name: traffic_source
@@ -118,17 +209,29 @@ models:
         description: Timestamp the user account was created.
 
   - name: dim_products
-    description: One row per product (catalog grain), with distribution center name resolved.
+    description: >
+      One row per product (catalog grain), with distribution center name
+      resolved from `stg_distribution_centers`.
     columns:
       - name: product_id
         description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: Product display name.
       - name: category
         description: Product category.
       - name: brand
         description: Product brand.
       - name: department
-        description: Product department.
+        description: Product department (e.g. Men, Women).
       - name: retail_price
-        description: Catalog list price. Always equals `sale_price` in this dataset — no discounting observed (D10).
+        description: >
+          Catalog list price. Always equals `sale_price` in this dataset —
+          no discounting observed (D10). Do not use for revenue
+          calculations — use `fct_order_items.sale_price`.
+      - name: sku
+        description: Stock keeping unit identifier.
       - name: distribution_center
         description: Name of the distribution center that stocks this product.
