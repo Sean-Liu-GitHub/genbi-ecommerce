@@ -19,5 +19,5 @@ The eval harness, question set, and comparative results are coming.
 - Monitoring: regression CI, cost per question, drift detection
 
 ## Related posts
-- [Post #1 title](link)
-- [Post #4 title](link)
+- [Better column descriptions made the AI right more often. Not reliably.](https://zhaidata.com/better-column-descriptions-made-the-ai-right-more-often-not-reliably)
+- [The definitions document isn't documentation. It's an accuracy intervention](https://zhaidata.com/the-definitions-document-isn-t-documentation-it-s-an-accuracy-intervention)
