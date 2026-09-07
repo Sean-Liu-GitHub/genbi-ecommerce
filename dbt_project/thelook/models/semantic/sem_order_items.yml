@@ -1,0 +1,75 @@
+semantic_models:
+  - name: order_items
+    description: >
+      Line-item grain. All revenue, cost, margin, and unit metrics
+      are defined here. MetricFlow aggregates to order or user grain
+      as needed via the entity relationships.
+    model: ref('fct_order_items')
+    defaults:
+      agg_time_dimension: ordered_at
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_id
+      - name: order
+        type: foreign
+        expr: order_id
+      - name: user
+        type: foreign
+        expr: user_id
+    dimensions:
+      - name: ordered_at
+        type: time
+        expr: cast(ordered_at as datetime)
+        type_params:
+          time_granularity: day
+      - name: line_status
+        type: categorical
+      - name: category
+        type: categorical
+      - name: brand
+        type: categorical
+      - name: department
+        type: categorical
+      - name: distribution_center
+        type: categorical
+    measures:
+      # --- revenue ---
+      - name: gross_revenue_m
+        agg: sum
+        expr: sale_price
+        description: "Sum of sale_price, all statuses (D6)."
+      - name: net_revenue_m
+        agg: sum
+        expr: "CASE WHEN line_status NOT IN ('Returned', 'Cancelled') THEN sale_price END"
+        description: "Sum of sale_price excluding Returned and Cancelled (D7)."
+
+      # --- cost ---
+      - name: total_cost_m
+        agg: sum
+        expr: unit_cost
+        description: "Sum of unit_cost, all statuses."
+      - name: net_cost_m
+        agg: sum
+        expr: "CASE WHEN line_status NOT IN ('Returned', 'Cancelled') THEN unit_cost END"
+        description: "Sum of unit_cost excluding Returned and Cancelled."
+
+      # --- margin ---
+      - name: gross_margin_m
+        agg: sum
+        expr: line_margin
+        description: "Sum of line_margin, all statuses."
+      - name: net_margin_m
+        agg: sum
+        expr: "CASE WHEN line_status NOT IN ('Returned', 'Cancelled') THEN line_margin END"
+        description: "Sum of line_margin excluding Returned and Cancelled."
+
+      # --- counts ---
+      - name: units_sold_m
+        agg: count
+        expr: order_item_id
+        description: "Count of all order lines."
+      - name: order_count_m
+        agg: count_distinct
+        expr: order_id
+        description: "Count of distinct orders."

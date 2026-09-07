@@ -35,3 +35,6 @@ models:
       +materialized: view
     marts:
       +materialized: table
+    semantic:
+      metricflow_time_spine:
+        +materialized: table

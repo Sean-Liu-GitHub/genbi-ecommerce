@@ -13,3 +13,4 @@ from {{ ref('stg_orders') }} o
 left join {{ ref('int_order_items_enriched') }} ie
     on ie.order_id = o.order_id
 group by 1, 2, 3, 4
+having count(ie.order_item_id) > 0

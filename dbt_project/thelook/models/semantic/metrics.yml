@@ -1,0 +1,90 @@
+metrics:
+  # --- simple ---
+  - name: net_revenue
+    type: simple
+    type_params: { measure: net_revenue_m }
+    description: "Default revenue metric (D7)."
+
+  - name: gross_revenue
+    type: simple
+    type_params: { measure: gross_revenue_m }
+    description: "Revenue across all statuses (D6)."
+
+  - name: net_cost
+    type: simple
+    type_params: { measure: net_cost_m }
+    description: "Cost excluding Returned and Cancelled."
+
+  - name: total_cost
+    type: simple
+    type_params: { measure: total_cost_m }
+    description: "Cost across all statuses."
+
+  - name: order_count
+    type: simple
+    type_params: { measure: order_count_m }
+    description: "Count of distinct orders."
+
+  - name: units_sold
+    type: simple
+    type_params: { measure: units_sold_m }
+    description: "Count of order lines."
+
+  - name: gross_margin
+    type: simple
+    type_params: { measure: gross_margin_m }
+    description: "Margin across all statuses, line grain."
+
+  - name: net_margin
+    type: simple
+    type_params: { measure: net_margin_m }
+    description: "Margin excluding Returned and Cancelled."
+
+  # --- ratio ---
+  - name: average_order_value
+    type: ratio
+    type_params:
+      numerator: net_revenue
+      denominator: order_count
+    description: "Net revenue per order."
+
+  - name: average_units_per_order
+    type: ratio
+    type_params:
+      numerator: units_sold
+      denominator: order_count
+    description: "Units per order."
+
+  - name: margin_rate
+    type: ratio
+    type_params:
+      numerator: net_margin
+      denominator: net_revenue
+    description: "Net margin as a fraction of net revenue."
+
+  # --- cumulative ---
+  - name: revenue_rolling_28d
+    type: cumulative
+    type_params:
+      measure: net_revenue_m
+      cumulative_type_params:
+        window: 28 days
+    description: "Trailing 28-day net revenue."
+
+  - name: orders_rolling_90d
+    type: cumulative
+    type_params:
+      measure: order_count_m
+      cumulative_type_params:
+        window: 90 days
+    description: "Trailing 90-day order count (same window as D8 active user)."
+
+  # --- derived ---
+  - name: net_margin_pct
+    type: derived
+    type_params:
+      expr: net_margin / nullif(net_revenue, 0)
+      metrics:
+        - net_margin
+        - net_revenue
+    description: "Net margin as a percentage of net revenue."
