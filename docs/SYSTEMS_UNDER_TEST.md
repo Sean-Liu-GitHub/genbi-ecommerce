@@ -96,26 +96,74 @@ This is a venv-local patch (gets wiped on `datus-bigquery` reinstall/upgrade)
 |---|---|---|
 | 1 | "How many total orders are there?" | Correct: 124,645 (matches `fct_orders`/`fct_order_items` distinct count exactly, Stage 3). Took 4 tool calls: `list_tables` → `describe_table` (failed on the naming bug above, pre-patch) → fell back to direct `execute_sql` with `COUNT(DISTINCT order_id)` on `fct_order_items` — correctly avoided the order-grain fan-out trap without being told to. |
 | 2 | "Which product categories had no sales in December 2023?" (anti-join, q306-style) | SQL and execution were correct (`category NOT IN (categories with Dec 2023 sales)`, verified zero NULL categories in that window, all 26 categories present — confirmed independently via `agent/bq.py`). Result set was correctly empty. But the agent's natural-language answer, *"No product categories had sales in December 2023,"* inverts the meaning of that empty result — it reads as zero sales occurred, when the correct reading is "no category was excluded, i.e. every category had sales." **SQL-correct, execution-correct, stated-answer misleading** — a distinct failure mode from both `structural` and `semantic` in the Stage 4.3 taxonomy: the query is airtight and the failure is purely in how the empty result gets glossed into English. Worth a taxonomy label of its own (`presentation`?) when building the grader. |
-| 3 | "What's our revenue?" (ambiguous: gross vs net, what period) | Routed to `task(type=ask_metrics)` → `search_metrics`, correctly recognizing this as metric-shaped rather than attempting freeform SQL. First attempt failed outright: the `dosi` semantic adapter package (`datus-semantic-dosi`, separate from `datus-bigquery`) wasn't installed (`pip install datus-semantic-dosi`, pulls in a ~46MB `dosi-engine` wheel). After installing it, `search_metrics` runs successfully but returns an **empty** result — Datus's own metric catalog is unpopulated by default; nothing has been bootstrapped into it yet (per the guide, that needs `/gen_semantic_model` or feeding it `manifest.json`, deferred to Stage 5). Response: *"there isn't a readily available metric... if you have a specific metric name, I can retrieve it."* |
+| 3 | "What's our revenue?" (ambiguous: gross vs net, what period) | See below — required bootstrapping the metadata KB first (a real Stage 3.5b step, not deferred work — see note). |
 
-**Ambiguity/clarification finding:** not yet observed. On this question, Datus
-never reached a fork where it had a *candidate* metric to disambiguate — its
-catalog was simply empty, so it reported "not found" rather than "which one
-did you mean." Genuine clarification behavior (asking gross vs. net,
-which period) requires the metric catalog to be populated first — deferred
-to Stage 5's Arm E wrapper, where feeding Datus the dbt `manifest.json` (or
-wiring its `semantic_layer: metricflow: {}` adapter directly to our
-MetricFlow project) is the more informative configuration for the D vs E
-comparison than its own from-scratch RAG catalog.
+**Bootstrapping the knowledge base.** The guide's 3.5b lists
+`datus-agent bootstrap-kb --datasource thelook --components metadata` as a
+step before the three test questions, not optional deferred work — questions
+1 and 2 above were run before this was done, which was a mistake in how this
+stage was first worked through. Running it exposed a **third bug**, separate
+from the `list_tables` naming issue:
 
-## Stage 3.5 checkpoint
+`datus-agent bootstrap-kb --datasource genbi_marts --components metadata`
+reported `schema_size=0, value_size=0` and logged *"No databases resolved
+for datasource genbi_marts (bigquery); skipping schema init"* even with
+`dataset: dbt_marts` correctly set in `agent.yml`. Root cause: this
+bootstrap code path (`datus/storage/schema_metadata/local_init.py`) reads
+the default database from a **different, generic config object**
+(`datus.configuration.agent_config.DbConfig`) than the one the SQL-execution
+tools use (`datus_bigquery.config.BigQueryConfig`) — and that generic
+wrapper only reads a literal `database:` key from the YAML, never `dataset:`.
+BigQuery's own connector config calls the same concept `dataset` (matching
+BigQuery's own terminology), so a config written correctly for the connector
+silently produces an empty value for this unrelated bootstrap path. No code
+patch needed — fixed by adding `database: dbt_marts` as an explicit
+additional key in `agent.yml` alongside `dataset: dbt_marts`; `BigQueryConfig`
+tolerates the extra alias key (its `catalog`/`database` → `project`/`dataset`
+normalizer consumes it before pydantic's `extra="forbid"` check runs). After
+the fix: `schema_size=13, value_size=13` — all 6 tables and 7 views indexed
+with vector embeddings (`qdrant/all-MiniLM-L6-v2-onnx`, downloaded
+automatically on first bootstrap).
 
-All three systems checked, at least one query run through each, dbt MCP's
-paywall and Datus's two missing-adapter gaps found and resolved/documented.
-Proceeding to Stage 4 with: Arm D = `mf` CLI router (not hosted dbt MCP),
-Arm E = Datus (bootstrap KB before ambiguity testing in Stage 5), Arm G =
-Gemini in BigQuery (done, Stage 1.4).
+**With the KB bootstrapped, re-running question 3 showed a real behavioral
+change:** the agent used `search_table` (semantic/vector search over the
+newly-indexed metadata, including sample rows) instead of blind
+`list_tables`, found `fct_orders`, inspected its columns, and correctly
+chose `net_revenue` over `gross_revenue` — matching our own D7 definition
+without being told it. Computed SQL:
+`SELECT SUM(net_revenue) FROM fct_orders WHERE order_status != 'Cancelled'`
+(the extra `order_status` filter is redundant but harmless here — header and
+line status agree 100% in this snapshot, Q4.3). Result: **$8,022,201.68**,
+matching the Stage 3 verified `net_revenue` total exactly. Hit the 30k TPM
+rate limit before producing the final natural-language response, but the
+tool trace already answers the actual test: **the agent never asked a
+clarifying question.** It silently picked net revenue and a lifetime
+(no time period) window on a question that's ambiguous on both axes,
+matching the correct dbt-team definition by luck/reasonable-default rather
+than by asking. This is the real Stage 3.5b finding: default Datus, even
+with schema metadata bootstrapped, disambiguates silently rather than
+asking — genuine ambiguity-*detection* behavior (if any exists) likely needs
+the fuller `semantic_modeling`/`metrics`/`reference_sql` KB components from
+Stage 5.4's E2 configuration, not just `metadata`.
 
 ## Arm G — Gemini in BigQuery
 
 Status: done in Stage 1.4. See `docs/GEMINI_EXPERIMENT.md`.
+
+## Stage 3.5 checkpoint
+
+All three systems checked, with at least one query run through each and
+clarification behavior on the ambiguous question specifically observed
+(not just deferred). Three real bugs found in third-party packages along
+the way (two in `datus-bigquery`, one venv-patched and kept, one config-only
+fix; one dbt-MCP access gap that's a plan limitation, not a bug) —
+documented above so they don't need rediscovering in Stage 5.
+
+Proceeding to Stage 4 with:
+- **Arm D** = `mf` CLI router (not the hosted dbt MCP server — paywalled on
+  the free tier)
+- **Arm E** = Datus, metadata KB bootstrapped (schema_size=13). Silently
+  disambiguates ambiguous questions rather than asking — Stage 5's E1/E2
+  split (metadata-only vs. + semantic models/metrics/reference SQL) should
+  test whether the fuller KB changes that, not just accuracy
+- **Arm G** = Gemini in BigQuery (done, Stage 1.4)
