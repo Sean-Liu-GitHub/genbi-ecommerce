@@ -24,8 +24,11 @@ any adjustments.
 revenue metric. When a question says "revenue" or "sales" without
 qualification, it means net revenue.
 
-The difference is material: gross revenue is $10,811,633; net revenue is
-$9,707,838 — a 10.2% gap. (Source: Q9.2)
+The difference is material: gross revenue is $10,736,861; net revenue is
+$8,022,202 — a 25.3% gap. Returns account for $1,095,449 and cancellations
+for $1,619,211 of excluded revenue. (Source: Q9.2, corrected — the original
+profiling query excluded only Returned, not Cancelled; the numbers here
+reflect the full D7 definition applied to the as_of_date-filtered data.)
 
 **Revenue anchor date:** `order_items.created_at` — the timestamp the order was
 placed. All period-based revenue questions ("sales in March", "Q2 revenue")

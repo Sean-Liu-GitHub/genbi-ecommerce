@@ -1,13 +1,11 @@
-import os
+from agent.config import MAX_BYTES, GCP_PROJECT, DBT_CREDENTIALS
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
-MAX_BYTES = int(os.environ.get("MAX_QUERY_BYTES", 10_000_000_000))
-
 def client(creds_path: str | None = None) -> bigquery.Client:
-    path = creds_path or os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+    path = creds_path or DBT_CREDENTIALS
     creds = service_account.Credentials.from_service_account_file(path)
-    return bigquery.Client(credentials=creds, project=os.environ["GCP_PROJECT"])
+    return bigquery.Client(credentials=creds, project=GCP_PROJECT)
 
 def dry_run_bytes(bq: bigquery.Client, sql: str) -> int:
     job = bq.query(sql, job_config=bigquery.QueryJobConfig(dry_run=True, use_query_cache=False))
