@@ -1,0 +1,209 @@
+- id: q101
+  tier: simple_lookup
+  question: "How many orders are there?"
+  ground_truth_sql: gt/q101.sql
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+- id: q102
+  tier: simple_lookup
+  question: "How many users do we have?"
+  ground_truth_sql: gt/q102.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q103
+  tier: simple_lookup
+  question: "How many product categories are there?"
+  ground_truth_sql: gt/q103.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q104
+  tier: simple_lookup
+  question: "What are our product departments?"
+  ground_truth_sql: gt/q104.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q105
+  tier: simple_lookup
+  question: "How many products do we carry?"
+  ground_truth_sql: gt/q105.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q106
+  tier: simple_lookup
+  question: "How many distribution centers do we have?"
+  ground_truth_sql: gt/q106.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q107
+  tier: simple_lookup
+  question: "What are the possible order statuses?"
+  ground_truth_sql: gt/q107.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q108
+  tier: simple_lookup
+  question: "How many order lines are there in total?"
+  ground_truth_sql: gt/q108.sql
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q109
+  tier: simple_lookup
+  question: "What is our total net revenue?"
+  ground_truth_sql: gt/q109.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q110
+  tier: simple_lookup
+  question: "What is our total gross revenue?"
+  ground_truth_sql: gt/q110.sql
+  expected_path: metricflow
+  expected_metric: gross_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q111
+  tier: simple_lookup
+  question: "What is our average order value?"
+  ground_truth_sql: gt/q111.sql
+  expected_path: metricflow
+  expected_metric: average_order_value
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q112
+  tier: simple_lookup
+  question: "How many brands do we sell?"
+  ground_truth_sql: gt/q112.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q113
+  tier: simple_lookup
+  question: "What country has the most customers?"
+  ground_truth_sql: gt/q113.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q114
+  tier: simple_lookup
+  question: "What is our overall return rate?"
+  ground_truth_sql: gt/q114.sql
+  expected_path: metricflow
+  expected_metric: return_rate
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q115
+  tier: simple_lookup
+  question: "What is the most popular product category by units sold?"
+  ground_truth_sql: gt/q115.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q116
+  tier: simple_lookup
+  question: "How many unique customers have placed an order?"
+  ground_truth_sql: gt/q116.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q117
+  tier: simple_lookup
+  question: "What is our total net margin?"
+  ground_truth_sql: gt/q117.sql
+  expected_path: metricflow
+  expected_metric: net_margin
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q118
+  tier: simple_lookup
+  question: "What is the average number of items per order?"
+  ground_truth_sql: gt/q118.sql
+  expected_path: metricflow
+  expected_metric: average_units_per_order
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q119
+  tier: simple_lookup
+  question: "How many orders were returned?"
+  ground_truth_sql: gt/q119.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q120
+  tier: simple_lookup
+  question: "What traffic source brings in the most customers?"
+  ground_truth_sql: gt/q120.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q121
+  tier: simple_lookup
+  question: "What is the most expensive product by retail price?"
+  ground_truth_sql: gt/q121.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q122
+  tier: simple_lookup
+  question: "What is our net margin rate?"
+  ground_truth_sql: gt/q122.sql
+  expected_path: metricflow
+  expected_metric: net_margin_rate
+  tolerance: 0.0001
+  grading: exact_set
+
+- id: q123
+  tier: simple_lookup
+  question: "How many cancelled orders do we have?"
+  ground_truth_sql: gt/q123.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q124
+  tier: simple_lookup
+  question: "What are the names of our distribution centers?"
+  ground_truth_sql: gt/q124.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q125
+  tier: simple_lookup
+  question: "What is the total cost of goods sold?"
+  ground_truth_sql: gt/q125.sql
+  expected_path: metricflow
+  expected_metric: net_cost
+  tolerance: 0.01
+  grading: exact_set
