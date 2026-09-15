@@ -30,6 +30,11 @@ metrics:
     type_params: { measure: units_sold_m }
     description: "Count of order lines."
 
+  - name: units_returned
+    type: simple
+    type_params: { measure: units_returned_m }
+    description: "Count of returned order lines."
+
   - name: gross_margin
     type: simple
     type_params: { measure: gross_margin_m }
@@ -54,6 +59,13 @@ metrics:
       numerator: units_sold
       denominator: order_count
     description: "Units per order."
+
+  - name: return_rate
+    type: ratio
+    type_params:
+      numerator: units_returned
+      denominator: units_sold
+    description: "Returned lines as a fraction of total lines."
 
   - name: margin_rate
     type: ratio

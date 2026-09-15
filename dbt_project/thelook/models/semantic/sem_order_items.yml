@@ -73,3 +73,7 @@ semantic_models:
         agg: count_distinct
         expr: order_id
         description: "Count of distinct orders."
+      - name: units_returned_m
+        agg: count
+        expr: "CASE WHEN line_status = 'Returned' THEN order_item_id END"
+        description: "Count of returned order lines."
