@@ -67,7 +67,7 @@ metrics:
       denominator: units_sold
     description: "Returned lines as a fraction of total lines."
 
-  - name: margin_rate
+  - name: net_margin_rate
     type: ratio
     type_params:
       numerator: net_margin
@@ -91,12 +91,3 @@ metrics:
         window: 90 days
     description: "Trailing 90-day order count (same window as D8 active user)."
 
-  # --- derived ---
-  - name: net_margin_pct
-    type: derived
-    type_params:
-      expr: net_margin / nullif(net_revenue, 0)
-      metrics:
-        - net_margin
-        - net_revenue
-    description: "Net margin as a percentage of net revenue."
