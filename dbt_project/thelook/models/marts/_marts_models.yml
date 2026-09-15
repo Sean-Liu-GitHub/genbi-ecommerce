@@ -209,6 +209,21 @@ models:
       - name: signed_up_at
         description: Timestamp the user account was created.
 
+  - name: dim_distribution_centers
+    description: >
+      One row per distribution center. Authoritative source for center
+      count and names — prefer this over deriving from `dim_products`.
+    columns:
+      - name: distribution_center_id
+        description: Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: Distribution center name.
+        tests:
+          - not_null
+
   - name: dim_products
     description: >
       One row per product (catalog grain), with distribution center name
