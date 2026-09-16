@@ -1,0 +1,276 @@
+- id: q201
+  tier: filtered_agg
+  question: "What was our net revenue in 2023?"
+  ground_truth_sql: gt/q201.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q202
+  tier: filtered_agg
+  question: "How many orders were placed in January 2024?"
+  ground_truth_sql: gt/q202.sql
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+- id: q203
+  tier: filtered_agg
+  question: "What is net revenue by product category?"
+  ground_truth_sql: gt/q203.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q204
+  tier: filtered_agg
+  question: "How many units did we sell in Q4 2023?"
+  ground_truth_sql: gt/q204.sql
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q205
+  tier: filtered_agg
+  question: "What is revenue by department?"
+  ground_truth_sql: gt/q205.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q206
+  tier: filtered_agg
+  question: "Which brand has the highest net revenue?"
+  ground_truth_sql: gt/q206.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q207
+  tier: filtered_agg
+  question: "What is the return rate by product category?"
+  ground_truth_sql: gt/q207.sql
+  expected_path: metricflow
+  expected_metric: return_rate
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q208
+  tier: filtered_agg
+  question: "How many orders per month in 2023?"
+  ground_truth_sql: gt/q208.sql
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+- id: q209
+  tier: filtered_agg
+  question: "What is net revenue by month in 2024?"
+  ground_truth_sql: gt/q209.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q210
+  tier: filtered_agg
+  question: "What are the top 10 brands by units sold?"
+  ground_truth_sql: gt/q210.sql
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q211
+  tier: filtered_agg
+  question: "How many customers signed up in 2023?"
+  ground_truth_sql: gt/q211.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q212
+  tier: filtered_agg
+  question: "What is net revenue for the Women's department in 2023?"
+  ground_truth_sql: gt/q212.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q213
+  tier: filtered_agg
+  question: "Which product categories had the highest return rate?"
+  ground_truth_sql: gt/q213.sql
+  expected_path: metricflow
+  expected_metric: return_rate
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q214
+  tier: filtered_agg
+  question: "How many active users do we have?"
+  ground_truth_sql: gt/q214.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q215
+  tier: filtered_agg
+  question: "What is net revenue by distribution center?"
+  ground_truth_sql: gt/q215.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q216
+  tier: filtered_agg
+  question: "What was gross margin by category in 2023?"
+  ground_truth_sql: gt/q216.sql
+  expected_path: metricflow
+  expected_metric: gross_margin
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q217
+  tier: filtered_agg
+  question: "Which state has the most customers?"
+  ground_truth_sql: gt/q217.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q218
+  tier: filtered_agg
+  question: "How many orders were placed per quarter in 2023?"
+  ground_truth_sql: gt/q218.sql
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+- id: q219
+  tier: filtered_agg
+  question: "What are the bottom 5 categories by net revenue?"
+  ground_truth_sql: gt/q219.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q220
+  tier: filtered_agg
+  question: "How many orders were cancelled in 2023?"
+  ground_truth_sql: gt/q220.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+
+- id: q222
+  tier: filtered_agg
+  question: "What percentage of customers are from the United States?"
+  ground_truth_sql: gt/q222.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q223
+  tier: filtered_agg
+  question: "How many orders did we get from each traffic source?"
+  ground_truth_sql: gt/q223.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q224
+  tier: filtered_agg
+  question: "What is net revenue for the Allegra K brand?"
+  ground_truth_sql: gt/q224.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q225
+  tier: filtered_agg
+  question: "What is the month-over-month order count trend in 2023?"
+  ground_truth_sql: gt/q225.sql
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+
+- id: q227
+  tier: filtered_agg
+  question: "What is net revenue by gender?"
+  ground_truth_sql: gt/q227.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q228
+  tier: filtered_agg
+  question: "How many orders shipped in February 2024?"
+  ground_truth_sql: gt/q228.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q229
+  tier: filtered_agg
+  question: "What is the margin rate by product category?"
+  ground_truth_sql: gt/q229.sql
+  expected_path: sql
+  tolerance: 0.0001
+  grading: exact_set
+
+- id: q230
+  tier: filtered_agg
+  question: "What is the year-over-year net revenue growth from 2022 to 2023?"
+  ground_truth_sql: gt/q230.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q231
+  tier: filtered_agg
+  question: "Which country has the highest average order value?"
+  ground_truth_sql: gt/q231.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q232
+  tier: filtered_agg
+  question: "How many new customers did we acquire each month in 2023?"
+  ground_truth_sql: gt/q232.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+
+- id: q234
+  tier: filtered_agg
+  question: "What are the top 5 cities by number of customers?"
+  ground_truth_sql: gt/q234.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q235
+  tier: filtered_agg
+  question: "What is net revenue by order status?"
+  ground_truth_sql: gt/q235.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
