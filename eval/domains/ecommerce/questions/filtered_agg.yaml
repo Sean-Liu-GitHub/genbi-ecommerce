@@ -36,7 +36,7 @@
 
 - id: q205
   tier: filtered_agg
-  question: "What is revenue by department?"
+  question: "What is net revenue by department?"
   ground_truth_sql: gt/q205.sql
   expected_path: metricflow
   expected_metric: net_revenue
@@ -228,7 +228,7 @@
 
 - id: q229
   tier: filtered_agg
-  question: "What is the margin rate by product category?"
+  question: "What is the net margin rate by product category?"
   ground_truth_sql: gt/q229.sql
   expected_path: sql
   tolerance: 0.0001
@@ -272,5 +272,138 @@
   question: "What is net revenue by order status?"
   ground_truth_sql: gt/q235.sql
   expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q236
+  tier: filtered_agg
+  trap: wrong_status_filter
+  question: "How many items were sold in each product category?"
+  ground_truth_sql: gt/q236.sql
+  distractor_sql: distractors/q236.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q237
+  tier: filtered_agg
+  question: "Which product categories had no sales in December 2023?"
+  ground_truth_sql: gt/q237.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q238
+  tier: filtered_agg
+  question: "What is the return rate by brand for the top 10 brands by gross revenue?"
+  ground_truth_sql: gt/q238.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q239
+  tier: filtered_agg
+  question: "What is net revenue by category for orders placed in Q1 2024?"
+  ground_truth_sql: gt/q239.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q240
+  tier: filtered_agg
+  question: "Which distribution center has the highest net margin rate?"
+  ground_truth_sql: gt/q240.sql
+  expected_path: sql
+  tolerance: 0.0001
+  grading: exact_set
+
+- id: q241
+  tier: filtered_agg
+  trap: wrong_timestamp
+  question: "What was the average delivery time in days for completed orders in 2023?"
+  ground_truth_sql: gt/q241.sql
+  distractor_sql: distractors/q241.sql
+  expected_error_ratio: null
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q242
+  tier: filtered_agg
+  question: "What are the top 5 brands by net margin in the Women's department?"
+  ground_truth_sql: gt/q242.sql
+  expected_path: metricflow
+  expected_metric: net_margin
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q243
+  tier: filtered_agg
+  question: "How many unique customers ordered from each product category in 2023?"
+  ground_truth_sql: gt/q243.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+
+
+- id: q246
+  tier: filtered_agg
+  question: "What are monthly units sold by department in 2023?"
+  ground_truth_sql: gt/q246.sql
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q247
+  tier: filtered_agg
+  question: "Which brands had declining net revenue from 2022 to 2023?"
+  ground_truth_sql: gt/q247.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q249
+  tier: filtered_agg
+  question: "How many orders contain items from more than one category?"
+  ground_truth_sql: gt/q249.sql
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q250
+  tier: filtered_agg
+  question: "Which categories have the highest cancellation rate?"
+  ground_truth_sql: gt/q250.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q251
+  tier: filtered_agg
+  question: "What is the average days between a customer's first and second order?"
+  ground_truth_sql: gt/q251.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q252
+  tier: filtered_agg
+  question: "What percentage of net revenue comes from the top 10 brands by net revenue?"
+  ground_truth_sql: gt/q252.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q253
+  tier: filtered_agg
+  question: "What is the net revenue by brand and department combination?"
+  ground_truth_sql: gt/q253.sql
+  expected_path: metricflow
+  expected_metric: net_revenue
   tolerance: 0.01
   grading: exact_set
