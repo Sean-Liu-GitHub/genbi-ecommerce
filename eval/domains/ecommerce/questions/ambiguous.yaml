@@ -1,0 +1,251 @@
+- id: q401
+  tier: ambiguous
+  ambiguity: "No metric specified — could mean revenue, orders, margin, or any other KPI. Quarter is also unspecified."
+  question: "How did we do last quarter?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask which metric (revenue, orders, margin, etc.) and which quarter."
+
+- id: q402
+  tier: ambiguous
+  ambiguity: "'Sales' is vague — could mean net revenue, gross revenue, or units sold. Year is missing and date basis (order, ship, delivery) is unspecified."
+  question: "What were sales in March?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask which year and what 'sales' means (net revenue, gross revenue, units sold, etc.). May also ask which date basis (order, ship, delivery)."
+
+- id: q403
+  tier: ambiguous
+  ambiguity: "Orders span multiple categories (28.6%), so attributing a full order's value to one category double-counts."
+  question: "What was AOV by product category in 2023?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must acknowledge that 28.6% of orders span multiple categories, making per-category AOV ambiguous. Should ask how to attribute multi-category orders."
+
+- id: q404
+  tier: ambiguous
+  ambiguity: "'Revenue' could mean gross (all statuses) or net (excluding returns and cancellations). Time period is also missing."
+  question: "What's our revenue?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether gross or net revenue, and what time period."
+
+- id: q405
+  tier: ambiguous
+  ambiguity: "'Revenue' could mean gross or net. Time granularity (daily, weekly, monthly) and date range are both unspecified."
+  question: "Show me the revenue trend."
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether gross or net revenue, what time granularity (daily, weekly, monthly), and what date range."
+
+- id: q406
+  tier: ambiguous
+  ambiguity: "'Performing best' has no defined measure — could be revenue, units, margin, growth rate, or something else. Time period is also missing."
+  question: "Which category is performing best?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask by which measure — revenue, units, margin, growth rate, etc. Should also ask what time period."
+
+- id: q407
+  tier: ambiguous
+  ambiguity: "'Margin' could mean gross or net, and could refer to a dollar amount or a percentage rate. Time period is also missing."
+  question: "What is our margin?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether gross or net margin, whether dollar amount or percentage, and what time period."
+
+- id: q408
+  tier: ambiguous
+  ambiguity: "Delivery time could be measured from order to delivery or from shipment to delivery. 19.6% of lines have shipped_at before ordered_at due to a data quality issue. Time period is also missing."
+  question: "How long does it take to deliver an order?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Should note that 19.6% of lines have shipped_at before ordered_at (data quality issue). May ask whether to measure order-to-delivery or ship-to-delivery. Should also ask what time period."
+
+- id: q409
+  tier: ambiguous
+  ambiguity: "'Top' is undefined — no metric, no count, no time period specified."
+  question: "What are our top products?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask: top by what metric? How many is 'top'? What time period?"
+
+- id: q410
+  tier: ambiguous
+  ambiguity: "No events or sessions data is linked to orders, so conversion rate cannot be computed from this schema without assumptions. Time period is also missing."
+  question: "What is the conversion rate by category?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must note there is no events/sessions data linked to orders (events table exists but has no order_id join). Conversion rate cannot be computed from this schema without assumptions. Should also ask what time period."
+
+- id: q411
+  tier: ambiguous
+  ambiguity: "No metric specified and 'last year' is ambiguous — could mean calendar year or trailing 12 months."
+  question: "How are we doing compared to last year?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask which metric and what constitutes 'last year' (calendar year, trailing 12 months)."
+
+- id: q412
+  tier: ambiguous
+  ambiguity: "'Focus on' is undefined — could mean highest value, at risk of churn, most recent, or something else entirely."
+  question: "Which customers should we focus on?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask what 'focus on' means — highest value, at risk of churn, most recent, etc."
+
+- id: q413
+  tier: ambiguous
+  ambiguity: "'Total cost' could mean all statuses or only non-returned/non-cancelled. Time period is also missing."
+  question: "What was our total cost?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether total cost (all statuses) or net cost (excluding returns and cancellations), and what time period."
+
+- id: q414
+  tier: ambiguous
+  ambiguity: "'Active' has no standard definition in the schema — could mean ordered in last 30, 60, or 90 days, and depends on the as-of date."
+  question: "How many customers are active?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Should ask what 'active' means or state the assumed definition (e.g., ordered in last 90 days). Bonus if it notes the definition depends on as_of_date."
+
+- id: q415
+  tier: ambiguous
+  ambiguity: "Customers buy across categories, so 'per customer by category' double-counts customers who purchased in multiple categories. Time period is also missing."
+  question: "What is revenue per customer by product category?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must acknowledge that customers buy across categories, so 'per customer by category' double-counts customers. Should ask for clarification on attribution and what time period."
+
+- id: q416
+  tier: ambiguous
+  ambiguity: "'Best' has no defined metric, and the year range to search over is unspecified."
+  question: "What was our best month?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask: best by which metric? Over what year range?"
+
+- id: q417
+  tier: ambiguous
+  ambiguity: "'Churn' has no standard definition in the schema — the inactivity window, baseline period, and cohort logic are all undefined. Time period is also missing."
+  question: "What is our churn rate?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must define or ask about the churn definition — what window defines churn, what baseline period, what time period, etc. There is no standard churn metric in the schema."
+
+- id: q418
+  tier: ambiguous
+  ambiguity: "Revenue could be gross or net. Orders also span multiple brands, so attributing order-level revenue to a single brand is ambiguous. Time period is also missing."
+  question: "What is revenue per order by brand?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether gross or net revenue, and what time period. Must also handle that orders can span brands — line-level revenue per order is needed."
+
+- id: q419
+  tier: ambiguous
+  ambiguity: "'Sales breakdown' is entirely open-ended — no dimension, time period, or metric specified."
+  question: "Show me the sales breakdown."
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask: breakdown by what dimension? What time period? What metric?"
+
+- id: q420
+  tier: ambiguous
+  ambiguity: "'When' could mean time-of-year seasonality, days after purchase, or day of week. The anchor timestamp for time-since-purchase is also ambiguous. Time period is also missing."
+  question: "When do most returns happen?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Should ask whether this means time-of-year seasonality, days-after-purchase, or day-of-week, and what time period. Should note that returned_at exists but return analysis by time since purchase depends on which order timestamp to anchor from."
+
+- id: q421
+  tier: ambiguous
+  ambiguity: "Orders span both Men and Women departments, so attributing a full order's value to one department double-counts. Time period is also missing."
+  question: "What is the average order value by department?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must acknowledge that orders can span both Men and Women departments, making per-department AOV ambiguous. Should ask how to attribute multi-department orders and what time period."
+
+- id: q422
+  tier: ambiguous
+  ambiguity: "'Age group' has no standard definition — bucket size and boundaries are undefined. Time period is also missing."
+  question: "Which age group has the highest number of orders?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask how to define age groups (bucket size, boundaries) and what time period. There is no standard age group definition in the schema."
+
+- id: q423
+  tier: ambiguous
+  ambiguity: "'Repeat purchase' is undefined — what count qualifies as repeat, what time window applies, and whether the denominator is all users or only those who ordered. Time period is also missing."
+  question: "What is the repeat purchase rate?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask how to define repeat purchase — what counts as a repeat (2+ orders?), over what time window, what time period, and whether the denominator is all users or only users who ordered."
+
+- id: q424
+  tier: ambiguous
+  ambiguity: "Orders span multiple brands, so attributing a full order's value to one brand double-counts. Time period is also missing."
+  question: "Which brands have the highest average order value?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must acknowledge that orders can span multiple brands, making per-brand AOV ambiguous. Should ask how to attribute multi-brand orders and what time period."
+
+- id: q425
+  tier: ambiguous
+  ambiguity: "'Repeat buyer' is undefined — could mean 2+ orders within the same category or 2+ orders overall. Time window and time period are also unspecified."
+  question: "Which category has the most repeat buyers?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask how to define 'repeat buyer' — 2+ orders within the same category, or 2+ orders overall? Should also ask about the time window and time period."
+
+- id: q426
+  tier: ambiguous
+  ambiguity: "'CLV' has no standard definition — could mean total revenue, total margin, or a more complex formula. 'Distribution' is also vague (summary stats vs percentiles vs histogram). Time period is also missing."
+  question: "What is the customer lifetime value distribution by traffic source?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask how to define CLV (total revenue, total margin, or a more complex formula). Should also ask what 'distribution' means (avg/min/max summary, percentiles, or histogram buckets) and what time period."
+
+- id: q427
+  tier: ambiguous
+  ambiguity: "Orders can contain items from multiple distribution centers, so per-DC revenue per order requires an attribution rule. Time period is also missing."
+  question: "What is net revenue per order by distribution center?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must acknowledge that orders can contain items from multiple distribution centers, making per-DC revenue per order ambiguous. Should ask how to attribute multi-DC orders and what time period."
+
+- id: q428
+  tier: ambiguous
+  ambiguity: "Denominator is ambiguous — could include all users who ordered or only users with at least one non-returned/non-cancelled order. Time period is also missing."
+  question: "What is the average net revenue per user by country?"
+  ground_truth_sql: null
+  expected_path: clarify
+  grading: llm_judge
+  judge_criteria: "Must ask whether the denominator includes all users who ordered or only users with non-returned/non-cancelled orders, and what time period. A user whose orders were all returned contributes $0 revenue but may or may not count in the denominator."
