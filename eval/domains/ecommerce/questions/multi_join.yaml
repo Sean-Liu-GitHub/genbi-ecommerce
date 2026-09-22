@@ -1,0 +1,114 @@
+- id: q301
+  tier: multi_join
+  trap: fanout_num_of_item
+  question: "How many items did we sell in 2023?"
+  ground_truth_sql: gt/q301.sql
+  distractor_sql: distractors/q301.sql
+  expected_error_ratio: 1.900
+  expected_path: metricflow
+  expected_metric: units_sold
+  tolerance: 0
+  grading: exact_set
+
+- id: q302
+  tier: multi_join
+  trap: fanout_revenue
+  question: "What was total net revenue by product category in 2023?"
+  ground_truth_sql: gt/q302.sql
+  distractor_sql: distractors/q302.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q303
+  tier: multi_join
+  trap: wrong_cost_column
+  question: "What is our gross margin by brand?"
+  ground_truth_sql: gt/q303.sql
+  distractor_sql: distractors/q303.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: gross_margin
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q305
+  tier: multi_join
+  trap: wrong_table
+  question: "What is the average cost per unit sold by category?"
+  ground_truth_sql: gt/q305.sql
+  distractor_sql: distractors/q305.sql
+  expected_error_ratio: null
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q307
+  tier: multi_join
+  trap: fanout_order_count
+  question: "How many orders per distribution center?"
+  ground_truth_sql: gt/q307.sql
+  distractor_sql: distractors/q307.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: order_count
+  tolerance: 0
+  grading: exact_set
+
+- id: q309
+  tier: multi_join
+  trap: sold_at_null
+  question: "When was the last sale for each product category?"
+  ground_truth_sql: gt/q309.sql
+  distractor_sql: distractors/q309.sql
+  expected_error_ratio: null
+  expected_path: sql
+  tolerance: 0
+  grading: exact_set
+
+- id: q315
+  tier: multi_join
+  trap: fanout_revenue
+  question: "What is the total net revenue per customer?"
+  ground_truth_sql: gt/q315.sql
+  distractor_sql: distractors/q315.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: net_revenue
+  tolerance: 0.01
+  grading: exact_set
+
+- id: q317
+  tier: multi_join
+  trap: wrong_cost_column
+  question: "What is our net margin rate by department?"
+  ground_truth_sql: gt/q317.sql
+  distractor_sql: distractors/q317.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: net_margin_rate
+  tolerance: 0.0001
+  grading: exact_set
+
+- id: q318
+  tier: multi_join
+  question: "What percentage of orders from each traffic source were returned?"
+  ground_truth_sql: gt/q318.sql
+  expected_path: sql
+  tolerance: 0.01
+  grading: exact_set
+
+
+- id: q321
+  tier: multi_join
+  trap: fanout_num_of_item
+  question: "What is the average number of items per order by category?"
+  ground_truth_sql: gt/q321.sql
+  distractor_sql: distractors/q321.sql
+  expected_error_ratio: null
+  expected_path: metricflow
+  expected_metric: average_units_per_order
+  tolerance: 0.01
+  grading: exact_set
