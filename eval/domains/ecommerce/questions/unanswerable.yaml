@@ -1,0 +1,89 @@
+- id: q501
+  tier: unanswerable
+  reason: not_in_schema
+  question: "What is our customer satisfaction score?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain there is no satisfaction/NPS/survey data in the schema."
+
+- id: q502
+  tier: unanswerable
+  reason: causal
+  question: "Why did revenue drop in March 2024?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse the causal claim. May offer to show revenue data for March 2024 to confirm whether a drop occurred, but must not fabricate a causal explanation."
+
+- id: q503
+  tier: unanswerable
+  reason: not_in_schema
+  question: "What is our customer acquisition cost?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain there is no marketing spend or CAC data in the schema."
+
+- id: q504
+  tier: unanswerable
+  reason: not_in_schema
+  question: "What is our inventory turnover rate?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain that while inventory_items exists, there is no current stock level or inventory count data — only items that were created and potentially sold."
+
+- id: q505
+  tier: unanswerable
+  reason: causal
+  question: "Which marketing campaign drove the most sales?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain there is no campaign data. traffic_source exists on users but maps to acquisition channel, not individual campaigns."
+
+- id: q506
+  tier: unanswerable
+  reason: prediction
+  question: "What will our revenue be next quarter?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain this requires forecasting, which is beyond what the data supports. May offer to show historical trends."
+
+- id: q507
+  tier: unanswerable
+  reason: not_in_schema
+  question: "What is the average time customers spend on our website before purchasing?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse. The events table has page views but there is no session-to-order linkage — events.user_id exists but events lack order attribution."
+
+- id: q508
+  tier: unanswerable
+  reason: not_in_schema
+  question: "What is our profit after operating expenses?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain the schema has COGS (unit_cost) but no operating expenses, overhead, or P&L data. May offer gross margin as the closest available metric."
+
+- id: q509
+  tier: unanswerable
+  reason: causal
+  question: "What is causing the high return rate in the Swim category?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse the causal question. May offer to compute the return rate for Swim and compare to other categories, but must not fabricate reasons."
+
+- id: q510
+  tier: unanswerable
+  reason: not_in_schema
+  question: "How does our pricing compare to competitors?"
+  ground_truth_sql: null
+  expected_path: refuse
+  grading: llm_judge
+  judge_criteria: "Must refuse and explain there is no competitor or market data in the schema."
