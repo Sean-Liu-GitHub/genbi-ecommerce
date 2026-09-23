@@ -4,7 +4,7 @@ WITH top_brands AS (
     SUM(sale_price) AS gross_revenue
   FROM `genbi-ecommerce.dbt_marts.fct_order_items`
   GROUP BY brand
-  ORDER BY net_revenue DESC
+  ORDER BY gross_revenue DESC
   LIMIT 10
 )
 SELECT

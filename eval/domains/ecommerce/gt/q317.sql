@@ -6,4 +6,4 @@ SELECT
 FROM `genbi-ecommerce.dbt_marts.fct_order_items`
 WHERE line_status NOT IN ('Returned', 'Cancelled')
 GROUP BY department
-ORDER BY margin_rate DESC
+ORDER BY net_margin_rate DESC
