@@ -11,3 +11,5 @@ __pycache__/
 credentials/
 .gcp/
 project-build-guide.md
+.eval_cache/
+eval/results/
