@@ -19,6 +19,7 @@ from agent.config import GCP_PROJECT
 from agent.bq import client, run as bq_run
 from eval.harness import questions as Q
 from eval.harness.grade import grade, classify_failure
+from eval.harness.judge import judge
 
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "eval" / "results"
@@ -85,9 +86,15 @@ def run_question(bq, question: dict, agent_fn, arm: str) -> dict:
     }
 
     if tier in ("ambiguous", "unanswerable"):
-        result["verdict"] = "needs_judge"
-        result["score"] = None
         result["grading"] = "llm_judge"
+        if arm == "stub":
+            result["verdict"] = "needs_judge"
+            result["score"] = None
+        else:
+            judge_result = judge(question, response)
+            result["verdict"] = judge_result.get("verdict", "judge_error")
+            result["score"] = judge_result.get("score", 0.0)
+            result["judge_reason"] = judge_result.get("reason", "")
         return result
 
     gt_df = execute_gt(bq, question)
