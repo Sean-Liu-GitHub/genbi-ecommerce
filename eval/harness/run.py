@@ -38,6 +38,14 @@ def stub_agent(question: str, arm: str) -> dict:
     return answer(question, arm)
 
 
+@register_agent("A")
+@register_agent("B")
+@register_agent("C")
+def text_to_sql_agent(question: str, arm: str) -> dict:
+    from agent.text_to_sql import answer
+    return answer(question, arm)
+
+
 def execute_gt(bq, question: dict) -> pd.DataFrame | None:
     sql = Q.load_gt_sql(question)
     if sql is None:
