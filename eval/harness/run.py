@@ -126,20 +126,25 @@ def run_eval(arm: str, repeats: int, tier: str | None = None):
     all_questions = Q.load_tier(tier) if tier else Q.load_all()
     bq = client()
 
-    all_results = []
-    for rep in range(repeats):
-        print(f"\n--- Repeat {rep + 1}/{repeats} ---")
-        for q in all_questions:
-            result = run_question(bq, q, agent_fn, arm)
-            result["repeat"] = rep + 1
-            all_results.append(result)
-            verdict = result.get("verdict", "?")
-            print(f"  {result['id']}: {verdict}")
-
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path = RESULTS_DIR / f"{arm}_{timestamp}.json"
-    out_path.write_text(json.dumps(all_results, indent=2, default=str))
+
+    all_results = []
+    try:
+        for rep in range(repeats):
+            print(f"\n--- Repeat {rep + 1}/{repeats} ---")
+            for q in all_questions:
+                result = run_question(bq, q, agent_fn, arm)
+                result["repeat"] = rep + 1
+                all_results.append(result)
+                verdict = result.get("verdict", "?")
+                print(f"  {result['id']}: {verdict}")
+    except Exception as e:
+        print(f"\nRun interrupted: {e}")
+        print(f"Saving {len(all_results)} partial results...")
+    finally:
+        out_path.write_text(json.dumps(all_results, indent=2, default=str))
     print(f"\nResults written to {out_path}")
 
     summary = pd.DataFrame(all_results)
